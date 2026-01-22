@@ -2090,9 +2090,19 @@ static int rk_gmac_probe(struct platform_device *pdev)
 {
 	struct plat_stmmacenet_data *plat_dat;
 	struct stmmac_resources stmmac_res;
+	struct clk *phy_ref_clk;
 	const struct rk_gmac_ops *data;
 	int ret;
+	phy_ref_clk = devm_clk_get(&pdev->dev, "ref_25M_clk");
+	if (IS_ERR(phy_ref_clk)) {
+		dev_err(&pdev->dev, "Failed to get ref_25M_clk: %ld\n", PTR_ERR(phy_ref_clk));
+	}
 
+
+	ret = clk_prepare_enable(phy_ref_clk);
+	if (ret) {
+		dev_err(&pdev->dev, "Failed to enable ref_25M_clk: %d\n", ret);
+	}
 	data = of_device_get_match_data(&pdev->dev);
 	if (!data) {
 		dev_err(&pdev->dev, "no of match data provided\n");
